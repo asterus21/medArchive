@@ -15,7 +15,7 @@ consts = CONST()
 
 def find(point: str) -> None:
 
-    """The function accepts an element of an HTML page to click."""
+    """The function accepts an element of a website to click."""
 
     try:
         driver.find_element(By.XPATH, point).click()
@@ -72,9 +72,12 @@ if __name__ == "__main__":
     title = "Архив клинических рекомендаций"
     assert title in driver.title
 
+    '''here we open the drop-down menu'''
     find(consts.cons(2))
+    '''and here we choose the 'Все' value'''
     find(consts.cons(3))
 
+    '''here we wait in case the page is not loaded'''
     try:
         wait = WebDriverWait(driver, 1000)
         e = wait.until(expected_conditions.visibility_of_element_located((By.XPATH, consts.cons(4))))
@@ -93,7 +96,6 @@ if __name__ == "__main__":
     # print(url)
 
     indices_revised, url_revised = revise(indices, url)
-
     # print(url_revised)
     # print(indices_revised)
 
@@ -103,14 +105,13 @@ if __name__ == "__main__":
     assert len(url_revised) == len(indices_revised) == len(titles_revised)
 
     results = [prefix + name for prefix, name in zip(indices_revised, titles_revised)]
-
     # print(results)
 
     for link, result in zip(url_revised, results):
         r = requests.get(link)
         if r.status_code == 200:
-            # time.sleep(10)
+            # time.sleep(len(url_revised) // 10)
             filepath = os.path.join(os.getcwd(), result + '.pdf')
-            print(filepath)
+            # print(filepath)
             with open(filepath, 'wb') as pdf_object:
                 pdf_object.write(r.content)

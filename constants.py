@@ -9,9 +9,9 @@ class CONST:
 
     # 0 DRIVER = 'D:/py/med/driver/chromedriver.exe'
     # 1 LINK = 'https://cr.minzdrav.gov.ru/archive'
-    # 2 START = '//*[@id="v-menu-21"]/div/div/div[7]/div[2]/div'
-    # 3 END = '//*[@id="input-19"]'
-    # 4 ANCHOR = '//*[@id="app"]/div/div/main/div/div/div[3]/div[2]/div[2]'
+    # 2 START = '//*[@id="app"]/div/div/main/div/div/div[3]/div[2]/div[1]/div/div/div/div[3]/div'
+    # 3 END = '//*[@id="v-menu-21"]/div/div/div[7]/div[2]/div'
+    # 4 ANCHOR = '//*[@id="app"]/div/div/main/div/div/div[3]/div[1]/table/tbody[1]/tr[377]/td[1]/span'
     # 5 INDICES = r'https:\/\/apicr.minzdrav.gov.ru\/api.ashx\?op=GetClinrecPdf&amp;id=(\d{1,4}_\d{1,4})'
     # 6 URL = r'https:\/\/apicr.minzdrav.gov.ru\/api.ashx\?op=GetClinrecPdf&amp;id=\d{1,4}_\d{1,4}',
     # 7 TITLES = r'https:\/\/apicr.minzdrav.gov.ru\/api.ashx\?op=GetClinrecPdf&amp;id=\d{1,4}_\d{1,4}"\sclass="">(.*?)</a></td><td>'
@@ -27,10 +27,11 @@ class CONST:
         
         LINK = 'https://cr.minzdrav.gov.ru/archive'        
         
-        START = '//*[@id="app"]/div/div/main/div/div/div[3]/div[2]/div[1]/div/div/div/div[3]/div'        
+        START = '//*[@id="app"]/div/div/main/div/div/div[3]/div[2]/div[1]/div/div/div/div[3]/div'
         
-        END = '//*[@id="v-menu-21"]/div/div/div[7]/div[2]/div'        
+        END = '//*[@id="v-menu-21"]/div/div/div[7]/div[2]/div'
         
+        '''note that the anchor is not a constant value'''
         ANCHOR = '//*[@id="app"]/div/div/main/div/div/div[3]/div[1]/table/tbody[1]/tr[377]/td[1]/span'
         
         INDICES = r'https:\/\/apicr.minzdrav.gov.ru\/api.ashx\?op=GetClinrecPdf&amp;id=(\d{1,4}_\d{1,4})'
