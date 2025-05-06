@@ -10,9 +10,22 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.wait import WebDriverWait
 
-from constants import Constants
+'''The constants to use in the script.'''
+DRIVER = 'driver/chromedriver.exe' # note that the relative path to the driver is used
+LINK = 'https://cr.minzdrav.gov.ru/archive'
+START = '//*[@id="app"]/div/div/main/div/div/div[3]/div[2]/div[1]/div/div/div/div[3]/div'
+END = '//*[@id="v-menu-21"]/div/div/div[7]/div[2]/div'
+ANCHOR = '//*[@id="app"]/div/div/main/div/div/div[3]/div[1]/table/tbody[1]/tr[377]/td[1]/span' # note that the value can be changed eventually
+INDICES = r'https:\/\/apicr.minzdrav.gov.ru\/api.ashx\?op=GetClinrecPdf&amp;id=(\d{1,4}_\d{1,4})'
+URL = r'https:\/\/apicr.minzdrav.gov.ru\/api.ashx\?op=GetClinrecPdf&amp;id=\d{1,4}_\d{1,4}'
+TITLES = r'https:\/\/apicr.minzdrav.gov.ru\/api.ashx\?op=GetClinrecPdf&amp;id=\d{1,4}_\d{1,4}"\sclass="">(.*?)<\/a><\/td><td>'
 
 class Parse():
+
+    """The class contains functions to find an element on the page to parse the page afterwards."""
+
+    def __init__(self):
+        pass
 
     def find_element(self, point: str) -> None:
 
@@ -37,6 +50,13 @@ class Parse():
 
         items = re.findall(regex, html)
         return items
+
+class Name():
+
+    def __init__(self):
+        pass
+
+    """The class contains functions to change the names of the articles to download them under new names."""
 
     def replace_character(self, names: list) -> list:
 
@@ -69,9 +89,9 @@ class Parse():
 if __name__ == "__main__":
 
     '''Here we're creating all used classes instances to operate them afterwards.'''
-    constants = Constants()
+    name = Name()
     options = Options()
-    parse = Parse()
+    parse = Parse()    
     service = Service()
 
     '''We are using the '--headless' option not to open the browser window.'''
@@ -79,22 +99,22 @@ if __name__ == "__main__":
 
     '''We are calling the browser with the option in hand and its driver as well.'''
     driver = webdriver.Chrome(service=service, options=options)
-    driver.get(constants.constants_to_store(1))
+    driver.get(LINK)
 
     '''We must be sure of the website we are going to parse.'''
     TITLE = "Архив клинических рекомендаций"
     assert TITLE in driver.title
 
     '''Here we are opening the drop-down menu of the articles list.'''
-    parse.find_element(constants.constants_to_store(2))
+    parse.find_element(START)
 
     '''And choosing the 'Все' value to see a full list of articles.'''
-    parse.find_element(constants.constants_to_store(3))
+    parse.find_element(END)
 
     '''Here we are waiting just in case the page is not loaded completely.'''
     try:
         wait = WebDriverWait(driver, 1000)
-        e = wait.until(expected_conditions.visibility_of_element_located((By.XPATH, constants.constants_to_store(4))))
+        e = wait.until(expected_conditions.visibility_of_element_located((By.XPATH, ANCHOR)))
     except:
         print('An unexpected error occured.\nPlease, restart the program.')
         driver.quit()
@@ -104,14 +124,14 @@ if __name__ == "__main__":
     html_text = driver.page_source
 
     '''This HTML page contains the URLs of the articles and some indices used as their names.'''
-    indices = parse.parse_page(constants.constants_to_store(5), html_text)
-    url = parse.parse_page(constants.constants_to_store(6), html_text)
+    indices = parse.parse_page(INDICES, html_text)
+    url = parse.parse_page(URL, html_text)
 
     '''We must change the indices of the articles and their URLs due to the files naming restrictions on Windows 10.'''
-    indices_revised, url_revised = parse.add_character(indices, url)
+    indices_revised, url_revised = name.add_character(indices, url)
     
     '''And replace some symbols in the articles titles themselves.'''
-    titles_revised = parse.replace_character(parse.parse_page(constants.constants_to_store(7), html_text))
+    titles_revised = name.replace_character(parse.parse_page(TITLES, html_text))
 
     '''We must be sure that we are going to download the same amount of articles as the number of indices and titles.'''
     assert len(url_revised) == len(indices_revised) == len(titles_revised)
@@ -123,7 +143,6 @@ if __name__ == "__main__":
     for link, result in zip(url_revised, results):
         r = requests.get(link)
         if r.status_code == 200:
-            # time.sleep(len(url_revised) // 10)
             filepath = os.path.join(os.getcwd(), result + '.pdf')
             with open(filepath, 'wb') as pdf_object:
                 pdf_object.write(r.content)
