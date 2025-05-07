@@ -51,20 +51,20 @@ class Page():
         items = re.findall(regex, html)
         return items
 
-class Name():
+class Title():
 
     """The class contains functions to change the names of the articles to download them under new names."""
 
     def __init__(self):
         pass
 
-    def replace_character(self, names: list) -> list:
+    def replace_character(self, titles: list) -> list:
 
         """The function accepts a list of article titles to remove invalid characters."""
 
         titles_revised = [    
-            name.replace(':', '_').replace('/', '_').replace('<', '_').replace('>', '_') 
-            for name in names
+            title.replace(':', '_').replace('/', '_').replace('<', '_').replace('>', '_') 
+            for title in titles
             ]
 
         return titles_revised
@@ -89,7 +89,7 @@ class Name():
 if __name__ == "__main__":
 
     '''Here we're creating all used classes instances to operate them afterwards.'''
-    name = Name()
+    title = Title()
     options = Options()
     page = Page()    
     service = Service()
@@ -105,10 +105,9 @@ if __name__ == "__main__":
     TITLE = "Архив клинических рекомендаций"
     assert TITLE in driver.title
 
-    '''Here we are opening the drop-down menu of the articles list.'''
+    '''Here we are opening the drop-down menu of the articles list.
+    And choosing the 'Все' value to see a full list of articles.'''
     page.find_element(START)
-
-    '''And choosing the 'Все' value to see a full list of articles.'''
     page.find_element(END)
 
     '''Here we are waiting just in case the page is not loaded completely.'''
@@ -128,18 +127,18 @@ if __name__ == "__main__":
     url = page.parse_page(URL, html_text)
 
     '''We must change the indices of the articles and their URLs due to the files naming restrictions on Windows 10.'''
-    indices_revised, url_revised = name.add_character(indices, url)
+    indices_revised, url_revised = title.add_character(indices, url)
     
     '''And replace some symbols in the articles titles themselves.'''
-    titles_revised = name.replace_character(page.parse_page(TITLES, html_text))
+    titles_revised = title.replace_character(page.parse_page(TITLES, html_text))
 
     '''We must be sure that we are going to download the same amount of articles as the number of indices and titles.'''
     assert len(url_revised) == len(indices_revised) == len(titles_revised)
 
     '''Finally, we have a list of article names to use.'''
-    results = [prefix + name for prefix, name in zip(indices_revised, titles_revised)]
+    results = [prefix + title for prefix, title in zip(indices_revised, titles_revised)]
 
-    '''The rest is to send a GET request to each URL to save an article under a name from the list.'''
+    '''The rest is to send a GET request to each URL to save an article under a title from the list.'''
     for link, result in zip(url_revised, results):
         r = requests.get(link)
         if r.status_code == 200:
