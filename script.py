@@ -145,8 +145,12 @@ if __name__ == "__main__":
     
     '''The rest is to send a GET request to each URL to save an article under a title from the list.'''
     for url, result in zip(urls, results):
-        r = requests.get(url)
-        if r.status_code == 200:
-            filepath = os.path.join(os.getcwd(), result + '.pdf')
-            with open(filepath, 'wb') as pdf_object:
-                pdf_object.write(r.content)
+        try: 
+            r = requests.get(url)
+            if r.status_code == 200:
+                filepath = os.path.join(os.getcwd(), result + '.pdf')
+                with open(filepath, 'wb') as pdf_object:
+                    pdf_object.write(r.content)
+                print(f"Downloaded: {result}.pdf")
+        except Exception as e:
+            print(f"Failed to download {result}: {str(e)}")
