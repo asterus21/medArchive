@@ -11,7 +11,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.wait import WebDriverWait
 
 '''The constants to use in the script.'''
-DRIVER = 'driver/chromedriver.exe' # note that the relative path to the driver is used
+# DRIVER = 'driver/chromedriver.exe' # note that the relative path to the driver is used
 LINK = 'https://cr.minzdrav.gov.ru/archive'
 START = '//*[@id="app"]/div/div/main/div/div/div[3]/div[2]/div[1]/div/div/div/div[3]/div'
 END = '//*[@id="v-menu-21"]/div/div/div[7]/div[2]/div'
@@ -53,10 +53,10 @@ class Parse():
 
 class Name():
 
+    """The class contains functions to change the names of the articles to download them under new names."""
+
     def __init__(self):
         pass
-
-    """The class contains functions to change the names of the articles to download them under new names."""
 
     def replace_character(self, names: list) -> list:
 
@@ -71,7 +71,7 @@ class Name():
 
     def add_character(self, ids: list, links: list) -> tuple:
 
-        """The function accepts a list of IDs and list of links to change/replace a character."""
+        """The function accepts a list of IDs and a list of links to change and replace a character."""
 
         indices_revised = []
         url_revised = []
