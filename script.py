@@ -86,6 +86,26 @@ class Title():
 
         return indices_revised, url_revised
 
+def get_urls_list(html: str) -> tuple:
+
+    '''This HTML page contains the URLs of the articles and some indices used as their names.'''    
+    indices = page.parse_page(INDICES, html)
+    url = page.parse_page(URL, html)
+    
+    '''We must replace some symbols in the articles titles themselves.'''
+    titles_revised = title.replace_character(page.parse_page(TITLES, html))
+
+    '''And change the indices of the articles and their URLs due to the files naming restrictions on Windows 10.'''
+    indices_revised, url_revised = title.add_character(indices, url)    
+
+    '''We must be sure that we are going to download the same amount of articles as the number of indices and titles.'''
+    assert len(url_revised) == len(indices_revised) == len(titles_revised)
+
+    '''Finally, we have a list of article names to use.'''
+    results = [prefix + title for prefix, title in zip(indices_revised, titles_revised)]
+
+    return results, url_revised
+
 if __name__ == "__main__":
 
     '''Here we're creating all used classes instances to operate them afterwards.'''
@@ -121,26 +141,11 @@ if __name__ == "__main__":
 
     '''We must get a raw HTML page first.'''
     html_text = driver.page_source
-
-    '''This HTML page contains the URLs of the articles and some indices used as their names.'''
-    indices = page.parse_page(INDICES, html_text)
-    url = page.parse_page(URL, html_text)
-
-    '''We must change the indices of the articles and their URLs due to the files naming restrictions on Windows 10.'''
-    indices_revised, url_revised = title.add_character(indices, url)
+    results, urls = get_urls_list(html_text)
     
-    '''And replace some symbols in the articles titles themselves.'''
-    titles_revised = title.replace_character(page.parse_page(TITLES, html_text))
-
-    '''We must be sure that we are going to download the same amount of articles as the number of indices and titles.'''
-    assert len(url_revised) == len(indices_revised) == len(titles_revised)
-
-    '''Finally, we have a list of article names to use.'''
-    results = [prefix + title for prefix, title in zip(indices_revised, titles_revised)]
-
     '''The rest is to send a GET request to each URL to save an article under a title from the list.'''
-    for link, result in zip(url_revised, results):
-        r = requests.get(link)
+    for url, result in zip(urls, results):
+        r = requests.get(url)
         if r.status_code == 200:
             filepath = os.path.join(os.getcwd(), result + '.pdf')
             with open(filepath, 'wb') as pdf_object:
