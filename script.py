@@ -13,14 +13,14 @@ from selenium.webdriver.support.wait import WebDriverWait
 '''The constants to use in the script.'''
 # DRIVER = 'driver/chromedriver.exe' # note that the relative path to the driver is used
 LINK = 'https://cr.minzdrav.gov.ru/archive'
-START = '//*[@id="app"]/div/div/main/div/div/div[3]/div[2]/div[1]/div/div/div/div[3]/div'
+START = '//*[@id="app"]/div/div/main/div/div/div[3]/div[2]/div[1]/div/div/div/div[4]/i'
 END = '//*[@id="v-menu-21"]/div/div/div[7]/div[2]/div'
 ANCHOR = '//*[@id="app"]/div/div/main/div/div/div[3]/div[1]/table/tbody[1]/tr[377]/td[1]/span' # note that the value can be changed eventually
 INDICES = r'https:\/\/apicr.minzdrav.gov.ru\/api.ashx\?op=GetClinrecPdf&amp;id=(\d{1,4}_\d{1,4})'
 URL = r'https:\/\/apicr.minzdrav.gov.ru\/api.ashx\?op=GetClinrecPdf&amp;id=\d{1,4}_\d{1,4}'
 TITLES = r'https:\/\/apicr.minzdrav.gov.ru\/api.ashx\?op=GetClinrecPdf&amp;id=\d{1,4}_\d{1,4}"\sclass="">(.*?)<\/a><\/td><td>'
 
-class Parse():
+class Page():
 
     """The class contains functions to find an element on the page to parse the page afterwards."""
 
@@ -91,7 +91,7 @@ if __name__ == "__main__":
     '''Here we're creating all used classes instances to operate them afterwards.'''
     name = Name()
     options = Options()
-    parse = Parse()    
+    page = Page()    
     service = Service()
 
     '''We are using the '--headless' option not to open the browser window.'''
@@ -106,10 +106,10 @@ if __name__ == "__main__":
     assert TITLE in driver.title
 
     '''Here we are opening the drop-down menu of the articles list.'''
-    parse.find_element(START)
+    page.find_element(START)
 
     '''And choosing the 'Все' value to see a full list of articles.'''
-    parse.find_element(END)
+    page.find_element(END)
 
     '''Here we are waiting just in case the page is not loaded completely.'''
     try:
@@ -124,14 +124,14 @@ if __name__ == "__main__":
     html_text = driver.page_source
 
     '''This HTML page contains the URLs of the articles and some indices used as their names.'''
-    indices = parse.parse_page(INDICES, html_text)
-    url = parse.parse_page(URL, html_text)
+    indices = page.parse_page(INDICES, html_text)
+    url = page.parse_page(URL, html_text)
 
     '''We must change the indices of the articles and their URLs due to the files naming restrictions on Windows 10.'''
     indices_revised, url_revised = name.add_character(indices, url)
     
     '''And replace some symbols in the articles titles themselves.'''
-    titles_revised = name.replace_character(parse.parse_page(TITLES, html_text))
+    titles_revised = name.replace_character(page.parse_page(TITLES, html_text))
 
     '''We must be sure that we are going to download the same amount of articles as the number of indices and titles.'''
     assert len(url_revised) == len(indices_revised) == len(titles_revised)
