@@ -1,9 +1,12 @@
+import logging
 import os
 import re
 import requests
 import sys
 
+from configparser import ConfigParser
 from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.chrome.options import Options
@@ -12,15 +15,16 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 from data import Paths, Regulars
 
-LINK = 'https://cr.minzdrav.gov.ru/archive'
+data = ConfigParser()
+data.read('data.ini')
 
-START = Paths().get_start_path()
-END = Paths().get_end_path()
-ANCHOR = Paths().get_anchor()
-
-INDICES = Regulars().get_indices()
-URL = Regulars().get_url()
-TITLES = Regulars().get_titles()
+LINK = data.get('LINKS', 'LINK')
+START = data.get('PATHS', 'START')
+END = data.get('PATHS', 'END')
+ANCHOR = data.get('PATHS', 'ANCHOR')
+INDICES = data.get('REGEX', 'INDICES')
+URL = data.get('REGEX', 'URL')
+TITLES = data.get('REGEX', 'TITLES')
 
 class Page:
 
@@ -29,9 +33,10 @@ class Page:
 
     def find_element(self, driver, point: str) -> None:
         try:
-            driver.find_element(By.XPATH, point).click()
-        except:
-            print('An unexpected error occured.\nPlease, restart the program.')
+            element = WebDriverWait(driver, 30).until(expected_conditions.element_to_be_clickable((By.XPATH, point)))
+            element.click()
+        except (NoSuchElementException, TimeoutException) as e:
+            logging.error(f'Element not found: {point} - {str(e)}.')
             driver.quit()
             sys.exit(1)
 
@@ -46,11 +51,13 @@ class Title:
 
     def replace_character(self, titles: list) -> list:
 
-        titles_revised = [    
-            title.replace(':', '_').replace('/', '_').replace('<', '_').replace('>', '_') 
-            for title in titles
-            ]
-
+        invalid_characters = r'<>:"/\|?*'
+        titles_revised = []
+        for title in titles:
+            for character in invalid_characters:
+                title = title.replace(character, '_')
+        
+            titles_revised.append(title)
         return titles_revised
 
     def add_character(self, ids: list, links: list) -> tuple:
@@ -93,6 +100,15 @@ def start_driver():
     driver = webdriver.Chrome(service=Service(), options=options)
 
     return driver
+
+def get_logs():
+    logs = logging.basicConfig(
+            level=logging.INFO,
+            format='%(asctime)s - %(levelname)s - %(message)s',
+            handlers=[logging.FileHandler('scrapper.log'), logging.StreamHandler()]
+        )
+    
+    return logs
 
 def main(driver):
 
