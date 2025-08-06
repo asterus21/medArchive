@@ -51,14 +51,12 @@ class Title:
 
     def replace_character(self, titles: list) -> list:
 
-        invalid_characters = r'<>:"/\|?*'
-        titles_revised = []
-        for title in titles:
-            for character in invalid_characters:
-                title = title.replace(character, '_')
+        INVALID_CHARACTERS = r'<>:"/\|?*'
+
+        def get_clear_string(string: str) -> str:
+            return ''.join('_' if character in INVALID_CHARACTERS else character for character in string)
         
-            titles_revised.append(title)
-        return titles_revised
+        return [get_clear_string(title) for title in titles]
 
     def add_character(self, ids: list, links: list) -> tuple:
 
