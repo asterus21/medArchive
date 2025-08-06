@@ -13,8 +13,6 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.wait import WebDriverWait
 
-from data import Paths, Regulars
-
 data = ConfigParser()
 data.read('data.ini')
 
