@@ -12,25 +12,17 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 from data import Paths, Regulars
 
-'''The constants to use in the script.'''
-
 LINK = 'https://cr.minzdrav.gov.ru/archive'
+
 START = Paths().get_start_path()
 END = Paths().get_end_path()
 ANCHOR = Paths().get_anchor()
+
 INDICES = Regulars().get_indices()
 URL = Regulars().get_url()
 TITLES = Regulars().get_titles()
 
-def start_driver():
-    
-    options = Options()
-    options.add_argument('--headless')
-    driver = webdriver.Chrome(service=Service(), options=options)
-
-    return driver
-
-class Page():
+class Page:
 
     def __init__(self):
         pass
@@ -47,7 +39,7 @@ class Page():
         items = re.findall(regex, html)
         return items
 
-class Title():
+class Title:
     
     def __init__(self):
         pass
@@ -93,6 +85,14 @@ def get_urls_list(html: str) -> tuple:
     results = [prefix + title for prefix, title in zip(indices_revised,titles_revised)]
 
     return results, url_revised
+
+def start_driver():
+    
+    options = Options()
+    options.add_argument('--headless')
+    driver = webdriver.Chrome(service=Service(), options=options)
+
+    return driver
 
 def main(driver):
 
