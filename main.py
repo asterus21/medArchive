@@ -1,4 +1,4 @@
-'''
+"""
 The repository contains a Python code to parse the archive from https://cr.minzdrav.gov.ru/archive.
 The main idea of the programm is to download PDF files.
 The files are downloaded with their indices used as prefixes to their titles.
@@ -7,7 +7,7 @@ When manually downloading a file from the website, you get only its index (but n
 The examples of the files are given in the "examples" folder. 
 Note that the Windows files and folders naming rules are quite strict.
 That's why some additional methods were given to save the files under new names.
-'''
+"""
 
 
 import logging
@@ -39,18 +39,19 @@ TITLES = data.get('REGEX', 'TITLES')
 
 
 class Page:
-    '''The class contains methods to work with a web page elements.'''
+    """Contains methods to work with a web page elements."""
 
     def __init__(self):
-        '''The initialization of the class is empty'''
+        """The initialization of the class is empty"""
+        pass
 
     def parse_page(self, regex: str, html: str) -> list:
-        '''The method is used to parse a web page.'''
+        """The method is used to parse a web page."""
         items = re.findall(regex, html)
         return items
 
     def find_element(self, chrome_driver, point: str) -> None:
-        '''The method is used to find a specific element of the page to click.'''
+        """The method is used to find a specific element of the page to click."""
         try:
             element = WebDriverWait(chrome_driver, 30).until(
                 expected_conditions.element_to_be_clickable((By.XPATH, point))
@@ -62,11 +63,14 @@ class Page:
             sys.exit(1)
 
 class Title:
-    '''The class contains methods to work with the articles titles.'''
+    """Contains methods to work with the articles titles."""
+
+    def __init__(self):
+        """The initialization of the class is empty"""
+        pass
 
     def replace_character(self, titles: list) -> list:
-        '''The method is used to replace forbidden characters in the articles titles.'''
-
+        """Replaces forbidden characters in the articles titles."""
         characters = r'<>:"/\|?*'
         title = []
         for t in titles:
@@ -76,40 +80,37 @@ class Title:
         return title
 
     def create_index(self, ids: list) -> list:
-        '''The method is used to create an index for each article.'''
+        """Creates an index for each article."""
         indices_revised = [i + "_" for i in ids]
         return indices_revised
 
     def add_character(self, links: list) -> list:
-        '''The method is used to swap the & symbol in each article's title.'''
+        """Swaps the & symbol in each article's title."""
         url_revised = [url.replace('&amp;', '&') for url in links]
         return url_revised
 
 
 def get_urls_list(html: str) -> tuple:
-
-    '''The function is used to create a tuple of URLs and titles to download the articles.'''
-
+    """Creates a tuple of URLs and titles to download the articles."""
+    # getting the page
     page = Page()
     ids = page.parse_page(INDICES, html)
     url = page.parse_page(URL, html)
-
+    # walking ove the titles
     title = Title()
     titles_revised = title.replace_character(page.parse_page(TITLES, html))
     indices_revised = title.create_index(ids)
     url_revised = title.add_character(url)
-
+    # asserting that the number of article is correct
     assert len(url_revised) == len(indices_revised) == len(titles_revised)
-
+    # collecting results
     results = [prefix + title for prefix, title in zip(indices_revised, titles_revised)]
 
     return results, url_revised
 
 
 def start_driver():
-
-    '''The function is used to start the driver.'''
-
+    """Starts the driver."""
     options = Options()
     options.add_argument('--headless')
     chrome_driver = webdriver.Chrome(service=Service(), options=options)
@@ -118,9 +119,7 @@ def start_driver():
 
 
 def get_logs():
-
-    '''The function is used to get logs.'''
-
+    """Collects log files."""
     return logging.basicConfig(
             level=logging.INFO,
             format='%(asctime)s - %(levelname)s - %(message)s',
@@ -129,26 +128,24 @@ def get_logs():
 
 
 def main(chrome_driver):
-
-    '''The main() function of the script.'''
-
+    """Main function of the script."""
     chrome_driver.get(LINK)
     page = Page()
     assert "Архив клинических рекомендаций" in chrome_driver.title
-
+    # finding anchors
     page.find_element(chrome_driver, START)
     page.find_element(chrome_driver, END)
-
+    # waiting for elements
     try:
         wait = WebDriverWait(chrome_driver, 1000)
         e = wait.until(expected_conditions.visibility_of_element_located((By.XPATH, ANCHOR)))
     except ConnectionRefusedError:
         chrome_driver.quit()
         sys.exit(1)
-
+    # clicking the page
     html_text = chrome_driver.page_source
     results, urls = get_urls_list(html_text)
-
+    # collecting elements
     for url, result in zip(urls, results):
         try:
             r = requests.get(url, timeout=10)
